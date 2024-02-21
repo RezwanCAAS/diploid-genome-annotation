@@ -28,3 +28,26 @@
     
     RepeatModeler -database condor_database -pa 8
 
+# 3-masking the genome using repeatmasker
+    #!/bin/bash
+    #
+    #SBATCH --job-name=repeatmasker
+    #SBATCH --output=repeatmasker.%j.out
+    #SBATCH --partition=batch
+    #SBATCH --cpus-per-task=32
+    #SBATCH --time=25:00:00
+    #SBATCH --mem=200G
+    
+    module load repeatmasker/4.1.1
+    
+    GENOME="condor_assembly.bp.p_ctg.fasta"
+    
+    RepeatMasker \
+    -pa 8 \
+    -gff \
+    -nolow \
+    -xsmall \
+    -dir soft_mask \
+    -lib condor_database-families.fa \
+    ${GENOME}
+
