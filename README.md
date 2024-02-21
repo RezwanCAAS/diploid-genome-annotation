@@ -137,3 +137,5 @@
     --species=condor --threads=32 --useexisting --GENEMARK_PATH=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/gmes_linux_64_4/ \
     --PROTHINT_PATH=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/gmes_linux_64_4/ProtHint/bin
 
+    
+
