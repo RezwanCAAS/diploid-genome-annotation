@@ -1,4 +1,4 @@
-# dragon-fruit-genome-annotation
+# diploid genome-annotation
 
 # 1-building the database using repeatmodeler
     #!/bin/bash
