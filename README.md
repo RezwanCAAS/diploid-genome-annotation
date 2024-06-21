@@ -12,7 +12,7 @@
     
     module load repeatmodeler/2.0.1
     
-    BuildDatabase -name condor_database condor_assembly.bp.p_ctg.fasta
+    BuildDatabase -name genome_database genome_assembly.bp.p_ctg.fasta
 
 # 2-making model of database using repeatmodeler
     #!/bin/bash
@@ -26,7 +26,7 @@
     
     module load repeatmodeler/2.0.1
     
-    RepeatModeler -database condor_database -pa 8
+    RepeatModeler -database genome_database -pa 8
 
 # 3-masking the genome using repeatmasker
     #!/bin/bash
@@ -40,7 +40,7 @@
     
     module load repeatmasker/4.1.1
     
-    GENOME="condor_assembly.bp.p_ctg.fasta"
+    GENOME="genome_assembly.bp.p_ctg.fasta"
     
     RepeatMasker \
     -pa 8 \
@@ -48,7 +48,7 @@
     -nolow \
     -xsmall \
     -dir soft_mask \
-    -lib condor_database-families.fa \
+    -lib genome_database-families.fa \
     ${GENOME}
 
 # RNA-Seq data analysis for evidence
@@ -64,7 +64,7 @@
     
     module load hisat2/2.1.0
     
-    hisat2-build condor_assembly.bp.p_ctg.fasta condor_index
+    hisat2-build genome_assembly.bp.p_ctg.fasta genome_index
 
 
     #2-mapping the NCBI downloaded RNA-Seq reads adn sorted with samtools
@@ -79,10 +79,10 @@
     
     module load hisat2/2.1.0 samtools/1.16.1
     
-    hisat2 -p 32 --dta -x /ibex/project/c2141/dragon-fruit/hifireads_condor/RNA-seq_data/rnaseq_ref/condor_index \
-    -1 SRR19863829_R1_trim.fastq.gz \
-    -2 SRR19863829_R2_trim.fastq.gz | \
-    samtools sort -@ 32 -o SRR19863829.bam
+    hisat2 -p 32 --dta -x ~/path/RNA-seq_data/rnaseq_ref/genome_index \
+    -1 reads_R1_trim.fastq.gz \
+    -2 reads_R2_trim.fastq.gz | \
+    samtools sort -@ 32 -o reads.bam
 
     #3-extract the alignment summary from mapping results
     cat *.summary | grep -E '*overall alignment rate'
@@ -121,21 +121,36 @@
     module load singularity/3.6 braker/2.1.4
     
     
-    singularity exec -B $PWD,/ibex,/sw --nv braker3.sif braker.pl --genome=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/repeatmodel/soft_mask/condor_assembly.bp.p_ctg.fasta.masked \
+    singularity exec -B $PWD,/ibex,/sw --nv braker3.sif braker.pl --genome=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/repeatmodel/soft_mask/genome_assembly.bp.p_ctg.fasta.masked \
     --prot_seq=/ibex/scratch/tariqr/genome_annotation/protein_sequences/ghb_db_cg_os_le.fa \
-    --bam=/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/DRR128251.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/DRR128253.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/DRR128254.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775188.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775193.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775195.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775200.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775202.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR13775203.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216397.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216398.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216399.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216400.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216401.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216403.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216404.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR15216405.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR19863825.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR19863829.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR2924904.bam,\
-    /ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR3203780.bam,/ibex/scratch/tariqr/genome_annotation/RNA_Seq_files/SRR8327215.bam \
+    --bam=~path/RNA_Seq_files/DRR128253.bam,\
+    ~path/RNA_Seq_files/SRR13775188.bam,\
+    ~path/RNA_Seq_files/SRR13775195.bam,\
+    ~path/RNA_Seq_files/SRR13775202.bam,\
     --species=condor --threads=32 --useexisting --GENEMARK_PATH=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/gmes_linux_64_4/ \
     --PROTHINT_PATH=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/gmes_linux_64_4/ProtHint/bin
 
-    
+# 4-Run BRAKER3 for gneome annotation using the evidence of RNA-Seq mapped data in .bam files and protein sequence data of different genomes
 
+	#!/bin/bash
+	#
+	#SBATCH --job-name=braker3
+	#SBATCH --output=braker3.%j.out
+	#SBATCH --partition=batch
+	#SBATCH --cpus-per-task=32
+	#SBATCH --time=300:00:00
+	#SBATCH --mem=200G
+	
+	module load singularity/3.9.7 braker/3.0.3/singularity
+	
+	singularity exec -B $PWD,$HOME,/ibex,/sw /ibex/sw/rl9c/braker/3.0.3/singularity/braker3_latest.sif braker.pl \
+	 --workingdir=~path/annotation/braker_annotation/braker1/ \
+	 --genome=~path/genome.fasta.masked \
+	 --prot_seq=/ibex/project/c2141/dragon-fruit/hifireads_condor/purge_haplotigs/annotation/protein_sequences/ghb_db_cg_os_le.fa \
+	 --bam=~path/RNA-Seq_files/DRR128251.bam,\
+	 ~path/RNA-Seq_files/DRR128253.bam,\
+	 ~path/RNA-Seq_files/DRR128254.bam,\
+	 ~path/RNA-Seq_files/SRR13775188.bam,\
+	 --AUGUSTUS_CONFIG_PATH=~path/braker1/Augustus/config/ \
+	 --crf --threads=32 --species=condor_purplepulp --busco_lineage=eudicots_odb10 --filterOutShort
+	
