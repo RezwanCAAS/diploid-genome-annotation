@@ -146,7 +146,7 @@
 	singularity exec -B $PWD,$HOME,/ibex,/sw /ibex/sw/rl9c/braker/3.0.3/singularity/braker3_latest.sif braker.pl \
 	 --workingdir=~path/annotation/braker_annotation/braker1/ \
 	 --genome=~path/genome.fasta.masked \
-	 --prot_seq=/ibex/project/c2141/dragon-fruit/hifireads_condor/purge_haplotigs/annotation/protein_sequences/ghb_db_cg_os_le.fa \
+	 --prot_seq=~/annotation/protein_sequences/ghb_db_cg_os_le.fa \
 	 --bam=~path/RNA-Seq_files/DRR128251.bam,\
 	 ~path/RNA-Seq_files/DRR128253.bam,\
 	 ~path/RNA-Seq_files/DRR128254.bam,\
