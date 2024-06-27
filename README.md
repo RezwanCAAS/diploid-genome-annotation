@@ -12,7 +12,7 @@
     
     module load repeatmodeler/2.0.1
     
-    BuildDatabase -name genome_database genome_assembly.bp.p_ctg.fasta
+    BuildDatabase -name genome_database genome.fasta
 
 # 2-making model of database using repeatmodeler
     #!/bin/bash
@@ -40,7 +40,7 @@
     
     module load repeatmasker/4.1.1
     
-    GENOME="genome_assembly.bp.p_ctg.fasta"
+    GENOME="genome.fasta"
     
     RepeatMasker \
     -pa 8 \
@@ -52,7 +52,7 @@
     ${GENOME}
 
 # RNA-Seq data analysis for evidence
-    #1-making reference using the assembled genome of condor
+    #1-making reference using the assembled genome
     #!/bin/bash
     #
     #SBATCH --job-name=reference_index
@@ -64,7 +64,7 @@
     
     module load hisat2/2.1.0
     
-    hisat2-build genome_assembly.bp.p_ctg.fasta genome_index
+    hisat2-build genome.fasta genome_index
 
 
     #2-mapping the NCBI downloaded RNA-Seq reads adn sorted with samtools
@@ -121,7 +121,7 @@
     module load singularity/3.6 braker/2.1.4
     
     
-    singularity exec -B $PWD,/ibex,/sw --nv braker3.sif braker.pl --genome=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/repeatmodel/soft_mask/genome_assembly.bp.p_ctg.fasta.masked \
+    singularity exec -B $PWD,/ibex,/sw --nv braker3.sif braker.pl --genome=/ibex/scratch/tariqr/genome_annotation/Braker_annotation/repeatmodel/soft_mask/genome.fasta.masked \
     --prot_seq=/ibex/scratch/tariqr/genome_annotation/protein_sequences/ghb_db_cg_os_le.fa \
     --bam=~path/RNA_Seq_files/DRR128253.bam,\
     ~path/RNA_Seq_files/SRR13775188.bam,\
